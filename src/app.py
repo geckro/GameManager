@@ -1,6 +1,7 @@
 import sys
-from PyQt6.QtWidgets import QMainWindow, QApplication, QMenuBar, QMenu, QLabel, QVBoxLayout, QWidget, QLineEdit
+from PyQt6.QtWidgets import QMainWindow, QApplication, QMenuBar, QMenu, QLabel, QVBoxLayout, QWidget, QLineEdit, QHBoxLayout, QFrame, QToolBar
 from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtCore import Qt
 from ui.menubar.help import Help
 from search import Search
 
@@ -16,24 +17,25 @@ class MainWindow(QMainWindow):
         
         
     def initUI(self):
+        # Create toolbar
+        toolbar = QToolBar(self)
+        self.addToolBar(toolbar)
 
-        # Search Label
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        layout = QVBoxLayout()
-        central_widget.setLayout(layout)
+        # Create search label and search box and add it to toolbar
         search_label = QLabel("Search: ")
-        layout.addWidget(search_label)
+        toolbar.addWidget(search_label)
         search_box = QLineEdit()
-        layout.addWidget(search_box)
+        toolbar.addWidget(search_box)
 
+        # When the enter key is pressed, connect it to to search.py
         search_box.returnPressed.connect(lambda: Search.search(search_box))
 
-
+        # Add menubar
         self.MenuActions()
         self.MenuBar()
-        # Set initial geometry
-        self.setGeometry(0, 0, 400, 300)
+
+        # Center the window
+        self.center()
 
     def MenuBar(self):
         menu_bar = QMenuBar(self)
@@ -73,7 +75,15 @@ class MainWindow(QMainWindow):
         self.help_update.triggered.connect(lambda: Help().MenuUpdate(self))
         self.help_about = QAction(QIcon.fromTheme('help-about'), "&About GameManager", self)
         self.help_about.triggered.connect(lambda: Help().MenuAbout(self))
-        
+    
+    def center(self):
+
+        qr = self.frameGeometry()
+        cp = self.screen().availableGeometry().center()
+
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
