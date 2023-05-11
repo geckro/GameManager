@@ -1,7 +1,5 @@
-import sys
-from PyQt6.QtWidgets import QMainWindow, QApplication, QMenuBar, QMenu, QLabel, QVBoxLayout, QWidget, QLineEdit, QHBoxLayout, QFrame, QToolBar
+from PyQt6.QtWidgets import QMainWindow, QMenuBar, QMenu, QLabel, QLineEdit, QToolBar
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtCore import Qt
 from ui.menubar.help import Help
 from search import Search
 
@@ -84,7 +82,3 @@ class MainWindow(QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-app = QApplication(sys.argv)
-window = MainWindow()
-window.show()
-sys.exit(app.exec())
