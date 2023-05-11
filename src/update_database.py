@@ -36,11 +36,11 @@ class UpdateDatabase:
             if len(commits_behind) > 0:
                 print(f"Local repository is {len(commits_behind)} commits behind. Updating...")
                 db_repo.git.merge()
-                print("Database updated.")
+                return "Database updated."
             
             # If there are no new changes 
             else:
-                print("Local repository is up-to-date")
+                return "Local repository is up-to-date"
 
         # If data/db.csv does not exist locally
         else:
