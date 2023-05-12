@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QMainWindow, QMenuBar, QMenu, QLabel, QLineEdit, QToolBar
 from PyQt6.QtGui import QAction, QIcon
-from ui.menubar.help import Help
-from search import Search
+from src.ui.menubar.help import Help
+from src.search import Search
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -12,8 +13,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("GameManager")
         self.setWindowIcon(QIcon("src/img/gamemanager.svg"))
 
-        
-        
     def initUI(self):
         # Create toolbar
         toolbar = QToolBar(self)
@@ -25,7 +24,7 @@ class MainWindow(QMainWindow):
         search_box = QLineEdit()
         toolbar.addWidget(search_box)
 
-        # When the enter key is pressed, connect it to to search.py
+        # When the enter key is pressed, connect it to search.py
         search_box.returnPressed.connect(lambda: Search.search(search_box))
 
         # Add menubar
@@ -58,7 +57,6 @@ class MainWindow(QMainWindow):
         help_menu.addAction(self.help_update)
         help_menu.addAction(self.help_about)
 
-    
     def MenuActions(self):
         self.file_new = QAction(QIcon.fromTheme('document-new'), "&New", self)
         self.file_open = QAction(QIcon.fromTheme('document-open'), "&Open", self)
@@ -73,12 +71,10 @@ class MainWindow(QMainWindow):
         self.help_update.triggered.connect(lambda: Help().MenuUpdate(self))
         self.help_about = QAction(QIcon.fromTheme('help-about'), "&About GameManager", self)
         self.help_about.triggered.connect(lambda: Help().MenuAbout(self))
-    
-    def center(self):
 
+    def center(self):
         qr = self.frameGeometry()
         cp = self.screen().availableGeometry().center()
 
         qr.moveCenter(cp)
         self.move(qr.topLeft())
-

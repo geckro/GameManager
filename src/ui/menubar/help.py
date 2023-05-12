@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QMessageBox
-from update_database import UpdateDatabase
+from src.update_database import UpdateDatabase
+
 
 class Help:
     def MenuAbout(self, parent):
@@ -12,6 +13,7 @@ class Help:
         License: MIT License
         """
         QMessageBox.about(parent, "About GameManager", about_message)
+
     def MenuUpdate(self, parent):
         updater = UpdateDatabase()
         status = updater.check()
@@ -19,4 +21,3 @@ class Help:
             QMessageBox.information(parent, "Update", status)
         else:
             QMessageBox.information(parent, "Update", "Database is up-to-date.")
-

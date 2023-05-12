@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTableView, QAbstractItemView
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTableView, QAbstractItemView, QHeaderView
 from PyQt6.QtGui import QStandardItemModel, QStandardItem
 from PyQt6.QtCore import pyqtSignal
+
 
 class GameView(QDialog):
     # Define a custom pyqtSignal for when a row is selected using the mouse
@@ -9,29 +10,33 @@ class GameView(QDialog):
     def __init__(self, df):
         super().__init__()
         self.setWindowTitle(f"Search Results")
-        
+
         # Creat a QVBoxLayout to hold the table view
         layout = QVBoxLayout(self)
 
-        # Create a QTableView widget and sort the table and disallow editing the table.
+        # Create a QTableView widget, sort the table, disallow editing and resize columns based on contents.
         self.table_view = QTableView(self)
         self.table_view.setSortingEnabled(True)
         self.table_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        
+
+        header = self.table_view.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        header.setStretchLastSection(True)
+
         # Create a QStandardItemModel to hold the data
         self.table_model = QStandardItemModel()
 
         # Set column header names
-        self.table_model.setHorizontalHeaderLabels(['Title', 'System'])
+        self.table_model.setHorizontalHeaderLabels(['Title', 'System', 'First Released'])
 
         # Add data to the table from the search results
         for i in range(df.shape[0]):
-            items = [QStandardItem(str(df.iloc[i,j])) for j in [0, 7]]
+            items = [QStandardItem(str(df.iloc[i, j])) for j in [0, 7, 6]]
             self.table_model.appendRow(items)
 
         # Set the table model for the table view
         self.table_view.setModel(self.table_model)
-        
+
         # Add the table view to the layout
         layout.addWidget(self.table_view)
 
@@ -54,6 +59,6 @@ class GameView(QDialog):
 
             # Emit the row_selected signal with the selected row data
             self.row_selected.emit(selected_rows)
-            
+
             # Close the dialog once you have selected a row
             self.close()
