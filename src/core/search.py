@@ -9,7 +9,7 @@ def search(value):
 # Uncomment if debugging
 if __name__ == "__main__":
     from src.core.parser import parser
-    debug_input = "Super Mario Galaxy"
+    debug_input = "Super Mario Galaxy 2"
     search_results = search(debug_input)
     if search_results:
         parsed_result = parser(search_results[0])

@@ -1,10 +1,13 @@
+import json
 import re
+import os
 
 import wikipedia
 from bs4 import BeautifulSoup
 import requests
 
 from src.core.platform_conversion import platform_conv
+from src.core.time import current_time
 
 info_mapping = {
     'Developer(s)': 'Developer',
@@ -91,10 +94,23 @@ def emulator_parser(systems, title):
 
 
 def parser(result):
-    # Call wikipedia_parser
+    # Call parsers
+    time_data = current_time()
     wikipedia_data = wikipedia_parser(result)
-    print("result 1", wikipedia_data)
+    emulator_data = emulator_parser(wikipedia_data.get('Platform', []), wikipedia_data.get('Name', ''))
 
-    # Call emulator_parser
-    emulator = emulator_parser(wikipedia_data.get('Platform', []), wikipedia_data.get('Name', ''))
-    print("result 2", emulator)
+    data_dict = {
+        'time': time_data,
+        'wikipedia': wikipedia_data,
+        'emulator': emulator_data
+    }
+
+    if not os.path.exists('data'):
+        os.makedirs('data')
+
+    # Put all the information into a text file as cache.
+    with open('data/cache.json', 'a') as cache_file:
+        json.dump(data_dict, cache_file)
+        cache_file.write('\n')
+
+    return data_dict
