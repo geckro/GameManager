@@ -1,33 +1,67 @@
-import pandas
-from src.ui.gameview import GameView
+import wikipedia
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtWidgets import QAbstractItemView
+
 
 class Search:
-    def search(search_box):
-        # Convert the search text to lowercase
-        search_text = search_box.text().lower()
+    def __init__(self, table_view):
+        # Reference to QTableView Widget
+        self.table_view = table_view
 
-        # Read the CSV file into a pandas DataFrame
-        file_path = "data/db.csv"
-        df = pandas.read_csv(file_path)
+        # Create a new QStandardItemModel and set it as the model for the QTableView widget
+        self.model = QStandardItemModel()
+        self.table_view.setModel(self.model)
 
-        # Create a new temporary column with lowercase values
-        df['TitleLower'] = df['Title'].str.lower()
+        # Enable sorting and disable editing
+        self.table_view.setSortingEnabled(True)
+        self.table_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
-        # Filter the dataFrame based on the search text
-        result_df = df[df['TitleLower'].str.contains(search_text)]
+        # Set the last section of the horizontal header of the QTableView widget to stretch
+        header = self.table_view.horizontalHeader()
+        header.setStretchLastSection(True)
 
-        # Drop the <Title_Lower> column from the result_df
-        result_df = result_df.drop(columns=['TitleLower'])
+        # Connect the clicked signal of the QTableView widget to the on_table_clicked slot
+        self.table_view.clicked.connect(self.on_table_clicked)
 
-        # Create a new GameView window with the result_df
-        game_view = GameView(result_df)
+    def search(self, search_text):
+        # Clear QStandardItemModel
+        self.model.clear()
+        self.table_view.show()
 
-        # Connect the row_selected signal to the handle_row_selected function
-        game_view.row_selected.connect(Search.handle_row_selected)
+        # Set the horizontal header label for the QStandardItemModel
+        self.model.setHorizontalHeaderLabels(['Search Results'])
 
-        # Show the game view table
-        game_view.exec()
+        # Search for results on Wikipedia
+        results = wikipedia.search(search_text)
 
-    def handle_row_selected(row):
-        # Do something with the selected row
-        print(row)
+        # Begin resetting the QStandardItemModel
+        self.model.beginResetModel()
+
+        # Loop through the search results and add them as QStandardItems to the QStandardItemModel
+        for result in results:
+            item = QStandardItem(result)
+            self.model.appendRow(item)  # Append the QStandardItem to the QStandardItemModel
+
+            # If the search_text matches a Wikipedia result perfectly, return that result
+            if search_text.lower() == result.lower():
+                self.table_view.hide()
+                return result
+
+        # End resetting the QStandardItemModel
+        self.model.endResetModel()
+
+    def on_table_clicked(self):
+        selected_indexes = self.table_view.selectedIndexes()
+        if not selected_indexes:
+            return
+
+        selected_index = selected_indexes[0]
+        selected_row = selected_index.row()
+
+        # Get the result from the selected row
+        result_index = self.model.index(selected_row, 0)
+        result = self.model.data(result_index)
+
+        self.table_view.hide()
+
+        return result

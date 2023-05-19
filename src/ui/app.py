@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow, QMenuBar, QMenu, QLabel, QLineEdit, QToolBar
+from PyQt6.QtWidgets import QMainWindow, QMenuBar, QMenu, QLabel, QLineEdit, QToolBar, QVBoxLayout, QWidget, QTableView
 from PyQt6.QtGui import QAction, QIcon
 from src.ui.menubar.help import Help
 from src.search import Search
@@ -24,8 +24,13 @@ class MainWindow(QMainWindow):
         search_box = QLineEdit()
         toolbar.addWidget(search_box)
 
-        # When the enter key is pressed, connect it to search.py
-        search_box.returnPressed.connect(lambda: Search.search(search_box))
+        # Create table view and add it to the main window
+        table_view = QTableView(self)
+        self.setCentralWidget(table_view)
+
+        # Create Search instance and connect the search box to its search method
+        search = Search(table_view)
+        search_box.returnPressed.connect(lambda: search.search(search_box.text().lower()))
 
         # Add menubar
         self.MenuActions()
