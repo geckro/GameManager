@@ -1,24 +1,24 @@
-import re
+from re import sub, split
 
 from bs4 import BeautifulSoup
 from wikipedia import wikipedia
 
 info_mapping = {
-    'Developer(s)': 'Developer',
-    'Publisher(s)': 'Publisher',
-    'Director(s)': 'Director',
-    'Producer(s)': 'Producer',
-    'Designer(s)': 'Designer',
-    'Programmer(s)': 'Programmer',
-    'Artist(s)': 'Artist',
-    'Writer(s)': 'Writer',
-    'Composer(s)': 'Composer',
-    'Engine': 'Engine',
-    'Series': 'Series',
-    'Platform(s)': 'Platform',
-    'Release': 'Release Date',
-    'Genre(s)': 'Genre',
-    'Mode(s)': 'Mode'
+    'Developer(s)': 'developers',
+    'Publisher(s)': 'publishers',
+    'Director(s)': 'directors',
+    'Producer(s)': 'producers',
+    'Designer(s)': 'designers',
+    'Programmer(s)': 'programmers',
+    'Artist(s)': 'artists',
+    'Writer(s)': 'writers',
+    'Composer(s)': 'composers',
+    'Engine': 'engine',
+    'Series': 'series',
+    'Platform(s)': 'platforms',
+    'Release': 'dates',
+    'Genre(s)': 'genres',
+    'Mode(s)': 'modes'
 }
 
 
@@ -36,23 +36,33 @@ def wikipedia_parser(game):
 
     # Extract the information from the infobox
     if wikipedia_infobox:
+        # Find all table rows in the infobox
         rows = wikipedia_infobox.find_all('tr')
         for row in rows:
+            # Find the table header in the row
             header = row.find('th')
+            # If header exists and its text is in info_mapping
             if header and header.text in info_mapping:
+                # Get corresponding key from info_mapping
                 key = info_mapping[header.text]
                 values = []
                 cells = row.find_all('td')
                 for cell in cells:
+                    # Get the text content of the cell, separated by ', '
                     text = cell.get_text(separator=', ').strip()
-                    split_values = re.split(r',\s+(?![^\[]*\])', text)
+                    # Split the text values based on a regex pattern
+                    split_values = split(r',\s+(?![^\[]*])', text)
+                    # Iterate over each split value
                     for value in split_values:
-                        value = re.sub(r'\[.*\]', '', value).strip()
+                        # Remove [a/b/c], and strip any  whitespace
+                        value = sub(r'\[.*?\]', '', value).strip()
+                        # If value is not empty, add it to the values list
                         if value:
                             values.append(value)
+                # Assign the list of values to the corresponding key
                 game_info[key] = values
 
     # Add game name to the dict
-    game_info['Name'] = game
+    game_info['title'] = game
 
     return game_info

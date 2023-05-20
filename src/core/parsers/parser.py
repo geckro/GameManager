@@ -15,7 +15,7 @@ def parser(result):
     # Call parsers
     time_data = current_time()
     wikipedia_data = wikipedia_parser(result)
-    emulator_data = emulator_parser(wikipedia_data.get('Platform', []), result, title_2)
+    emulator_data = emulator_parser(wikipedia_data.get('Platform', []), result, title_2, title_4)
     tcrf_data = tcrf_parser(title_2)
     hltb_data = howlongtobeat_parser(title_3)
     ra_data = retroachievements_parser(title_4, (wikipedia_data.get('Platform', [])))
