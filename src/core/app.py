@@ -1,6 +1,6 @@
 import pytermgui as ptg
 from src.core.search import search
-from src.core.parser import parser
+from src.core.parsers.parser import parser
 OUTPUT = {}
 
 
