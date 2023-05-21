@@ -7,18 +7,17 @@ from src.core.parsers.parser_wikipedia import wikipedia_parser
 from src.core.time import current_time
 
 
-def parser(result):
-    title_2 = result.replace(" ", "_")  # Replace any spaces with an underscore
-    title_3 = result.replace(" ", "%2520")
-    title_4 = result.replace(" ", "+")
-
+def parser(game_title):
     # Call parsers
     time_data = current_time()
-    wikipedia_data = wikipedia_parser(result)
-    emulator_data = emulator_parser(wikipedia_data.get('Platform', []), result, title_2, title_4)
-    tcrf_data = tcrf_parser(title_2)
-    hltb_data = howlongtobeat_parser(title_3)
-    ra_data = retroachievements_parser(title_4, (wikipedia_data.get('Platform', [])))
+
+    wikipedia_data = wikipedia_parser(game_title)
+    platforms = wikipedia_data.get('platforms', [])
+
+    emulator_data = emulator_parser(platforms, game_title)
+    tcrf_data = tcrf_parser(game_title)
+    hltb_data = howlongtobeat_parser(game_title)
+    ra_data = retroachievements_parser(game_title, platforms)
 
     data_dict = {
         'time': time_data,
@@ -29,6 +28,7 @@ def parser(result):
         'ra': ra_data,
     }
 
+    # Writes the finished parser results to "data/db.json"
     write_to_database(data_dict)
 
     return data_dict

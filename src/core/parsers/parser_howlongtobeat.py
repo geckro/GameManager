@@ -8,7 +8,7 @@
 # HLTB is a dynamic website with no public API. Might need a new library
 
 def howlongtobeat_parser(game_title):
-
+    game_title = game_title.replace(" ", "%2520")
     url = f'https://www.howlongtobeat.com/?q={game_title}'
     # temporary return statement
     return url
