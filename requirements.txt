@@ -1,5 +1,1 @@
-PyQt6==6.5.0
-wikipedia~=1.4.0
-pytermgui~=7.3.0
-beautifulsoup4~=4.12.2
-requests~=2.30.0
+PyQt6==6.6.0
