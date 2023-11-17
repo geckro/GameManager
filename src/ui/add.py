@@ -29,6 +29,7 @@ class Add(QDialog):
     def submit(self):
         data = self.data_edit.text()
 
-        json_data = PlatformData()
-        json_data.append_to_json(data)
+        if data != '':
+            json_data = PlatformData()
+            json_data.append_to_json(data)
         self.close()

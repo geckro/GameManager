@@ -2,19 +2,53 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLineEdit, QPushButton, QDateEdit, QLabel, QHBoxLayout, \
     QTreeWidget, QTreeWidgetItem
 
+from src.core.data.developer_data import DeveloperData
 from src.core.data.game_data import GameData
+from src.core.data.genre_data import GenreData
+from src.core.data.platform_data import PlatformData
+from src.core.data.publisher_data import PublisherData
+from src.core.log import log
+
+
+def helper_qtreewidget(item_list, title: str):
+    widget = QTreeWidget()
+    widget.setHeaderHidden(True)
+    widget_tree = QTreeWidgetItem(widget)
+    widget_tree.setText(0, title)
+    widget_tree.setExpanded(False)
+    for item in item_list:
+        widget_item = QTreeWidgetItem(widget_tree)
+        widget_item.setFlags(widget_item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+        widget_item.setText(0, item)
+        widget_item.setCheckState(0, Qt.CheckState.Unchecked)
+
+    return widget
+
+
+def get_checked_items(tree):
+    checked_items = []
+    root = tree.invisibleRootItem()
+    child_count = root.childCount()
+    for i in range(child_count):
+        parent = root.child(i)
+        for j in range(parent.childCount()):
+            child = parent.child(j)
+            if child.checkState(0) == Qt.CheckState.Checked:
+                checked_items.append(child.text(0))
+    return checked_items
 
 
 class New(QDialog):
     def __init__(self):
         super().__init__()
-
-        self.genre_list = ["Action", "Adventure", "Puzzle", "RPG", "Strategy"]
-        self.developer_list = ["Nintendo EAD", "Nintendo EPD"]
-        self.publisher_list = ["Nintendo", "Sony"]
-        self.platform_list = ["Wii", "3DS"]
-
+        self.platform_field = None
+        self.developer_field = None
+        self.genre_field = None
+        self.publisher_field = None
+        self.date_edit = None
+        self.title_edit = None
         self.init_ui()
+        self.setWindowTitle('GameManager - New Title')
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -23,66 +57,19 @@ class New(QDialog):
         advanced_info_layout = QVBoxLayout()
         submit_layout = QHBoxLayout()
 
-        self.title_edit = QLineEdit(self)
-        basic_info_layout.addWidget(QLabel("Title"))
-        basic_info_layout.addWidget(self.title_edit)
+        self.init_title(basic_info_layout)
 
-        self.date_edit = QDateEdit(self)
-        self.date_edit.setDisplayFormat('yyyy-MMM-dd')
-        self.date_edit.setCalendarPopup(True)
-        basic_info_layout.addWidget(QLabel("Date"))
-        basic_info_layout.addWidget(self.date_edit)
+        self.init_date(basic_info_layout)
 
-        self.platform_field = QTreeWidget()
-        self.platform_field.setHeaderHidden(True)
-        platform_tree = QTreeWidgetItem(self.platform_field)
-        platform_tree.setText(0, "Platform")
-        for platform in self.platform_list:
-            platform_item = QTreeWidgetItem(platform_tree)
-            platform_item.setFlags(platform_item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            platform_item.setText(0, platform)
-            platform_item.setCheckState(0, Qt.CheckState.Unchecked)
-        basic_info_layout.addWidget(self.platform_field)
+        self.init_platform(basic_info_layout)
 
-        self.genre_field = QTreeWidget()
-        self.genre_field.setHeaderHidden(True)
-        genre_tree = QTreeWidgetItem(self.genre_field)
-        genre_tree.setText(0, "Genres")
-        genre_tree.setExpanded(False)
-        for genre in self.genre_list:
-            genre_item = QTreeWidgetItem(genre_tree)
-            genre_item.setFlags(genre_item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            genre_item.setText(0, genre)
-            genre_item.setCheckState(0, Qt.CheckState.Unchecked)
-        basic_info_layout.addWidget(self.genre_field)
+        self.init_genre(basic_info_layout)
 
-        self.developer_field = QTreeWidget()
-        self.developer_field.setHeaderHidden(True)
-        developer_tree = QTreeWidgetItem(self.developer_field)
-        developer_tree.setText(0, "Developers")
-        developer_tree.setExpanded(False)
-        for developer in self.developer_list:
-            developer_item = QTreeWidgetItem(developer_tree)
-            developer_item.setFlags(developer_item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            developer_item.setText(0, developer)
-            developer_item.setCheckState(0, Qt.CheckState.Unchecked)
-        advanced_info_layout.addWidget(self.developer_field)
+        self.init_developer(advanced_info_layout)
 
-        self.publisher_field = QTreeWidget()
-        self.publisher_field.setHeaderHidden(True)
-        publisher_tree = QTreeWidgetItem(self.publisher_field)
-        publisher_tree.setText(0, "Publishers")
-        publisher_tree.setExpanded(False)
-        for publisher in self.publisher_list:
-            publisher_item = QTreeWidgetItem(publisher_tree)
-            publisher_item.setFlags(publisher_item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            publisher_item.setText(0, publisher)
-            publisher_item.setCheckState(0, Qt.CheckState.Unchecked)
-        advanced_info_layout.addWidget(self.publisher_field)
+        self.init_publisher(advanced_info_layout)
 
-        submit_button = QPushButton("Submit", self)
-        submit_button.clicked.connect(self.submit)
-        submit_layout.addWidget(submit_button)
+        self.init_submit(submit_layout)
 
         layout_encapsulation.addLayout(basic_info_layout)
         layout_encapsulation.addLayout(advanced_info_layout)
@@ -90,28 +77,60 @@ class New(QDialog):
         layout.addLayout(submit_layout)
         self.setLayout(layout)
 
-    def get_checked_items(self, tree):
-        checked_items = []
-        root = tree.invisibleRootItem()
-        child_count = root.childCount()
-        for i in range(child_count):
-            parent = root.child(i)
-            for j in range(parent.childCount()):
-                child = parent.child(j)
-                if child.checkState(0) == Qt.CheckState.Checked:
-                    checked_items.append(child.text(0))
-        return checked_items
+    def init_submit(self, submit_layout):
+        submit_button = QPushButton("Submit", self)
+        submit_button.clicked.connect(self.submit)
+        submit_layout.addWidget(submit_button)
 
+    def init_date(self, basic_info_layout):
+        self.date_edit = QDateEdit(self)
+        self.date_edit.setDisplayFormat('yyyy-MMM-dd')
+        self.date_edit.setCalendarPopup(True)
+        basic_info_layout.addWidget(QLabel("Date"))
+        basic_info_layout.addWidget(self.date_edit)
+
+    def init_title(self, basic_info_layout):
+        self.title_edit = QLineEdit(self)
+        basic_info_layout.addWidget(QLabel("Title"))
+        basic_info_layout.addWidget(self.title_edit)
+
+    def init_publisher(self, advanced_info_layout):
+        log('info', 'initializing new publisher')
+        publisher_data_obj = PublisherData()
+        publisher_list = publisher_data_obj.get_publishers()
+        self.publisher_field = helper_qtreewidget(publisher_list, 'Publishers')
+        advanced_info_layout.addWidget(self.publisher_field)
+
+    def init_genre(self, basic_info_layout):
+        log('info', 'initializing new genre')
+        genre_data_obj = GenreData()
+        genre_list = genre_data_obj.get_genres()
+        self.genre_field = helper_qtreewidget(genre_list, 'Genres')
+        basic_info_layout.addWidget(self.genre_field)
+
+    def init_developer(self, advanced_info_layout):
+        log('info', 'initializing new developer')
+        developer_data_obj = DeveloperData()
+        developer_list = developer_data_obj.get_developers()
+        self.developer_field = helper_qtreewidget(developer_list, 'Developers')
+        advanced_info_layout.addWidget(self.developer_field)
+
+    def init_platform(self, basic_info_layout):
+        log('info', 'initializing new platform')
+        platform_data_obj = PlatformData()
+        platform_list = platform_data_obj.get_platforms()
+        self.platform_field = helper_qtreewidget(platform_list, 'Platforms')
+        basic_info_layout.addWidget(self.platform_field)
 
     def submit(self):
         title = self.title_edit.text()
         date = self.date_edit.date().toString()
 
         # Get checked items from each tree
-        selected_platforms = self.get_checked_items(self.platform_field)
-        selected_genres = self.get_checked_items(self.genre_field)
-        selected_developers = self.get_checked_items(self.developer_field)
-        selected_publishers = self.get_checked_items(self.publisher_field)
+        selected_platforms = get_checked_items(self.platform_field)
+        selected_genres = get_checked_items(self.genre_field)
+        selected_developers = get_checked_items(self.developer_field)
+        selected_publishers = get_checked_items(self.publisher_field)
 
         # Create the data dictionary
         data = {
@@ -124,6 +143,6 @@ class New(QDialog):
         }
 
         json_data = GameData()
-        json_data.append_to_data_json(data)
+        json_data.append_to_json(data)
 
         self.close()

@@ -25,7 +25,6 @@ class InitUI:
         layout = QVBoxLayout(central_widget)
 
         self.init_table(layout)
-
         self.load_data()
 
     def init_toolbar(self, central_widget):
@@ -56,7 +55,6 @@ class InitUI:
     def load_data(self):
         # Read the JSON data
         data = self.common_data.open_json()
-
         # Set up the table
         self.main_window.table_widget.setRowCount(len(data))
         self.main_window.table_widget.setColumnCount(len(self.keys))
