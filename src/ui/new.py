@@ -38,49 +38,36 @@ def get_checked_items(tree):
     return checked_items
 
 
-class New(QDialog):
+class NewManual:
     def __init__(self):
-        super().__init__()
         self.platform_field = None
+        self.date_edit = None
         self.developer_field = None
         self.genre_field = None
-        self.publisher_field = None
-        self.date_edit = None
         self.title_edit = None
-        self.init_ui()
-        self.setWindowTitle('GameManager - New Title')
-
-    def init_ui(self):
-        layout = QVBoxLayout()
-        layout_encapsulation = QHBoxLayout()
-        basic_info_layout = QVBoxLayout()
-        advanced_info_layout = QVBoxLayout()
-        submit_layout = QHBoxLayout()
-
-        self.init_title(basic_info_layout)
-
-        self.init_date(basic_info_layout)
-
-        self.init_platform(basic_info_layout)
-
-        self.init_genre(basic_info_layout)
-
-        self.init_developer(advanced_info_layout)
-
-        self.init_publisher(advanced_info_layout)
-
-        self.init_submit(submit_layout)
-
-        layout_encapsulation.addLayout(basic_info_layout)
-        layout_encapsulation.addLayout(advanced_info_layout)
-        layout.addLayout(layout_encapsulation)
-        layout.addLayout(submit_layout)
-        self.setLayout(layout)
+        self.publisher_field = None
 
     def init_submit(self, submit_layout):
         submit_button = QPushButton("Submit", self)
         submit_button.clicked.connect(self.submit)
         submit_layout.addWidget(submit_button)
+
+    def init_manual(self, layout):
+        layout_encapsulation = QHBoxLayout()
+        basic_info_layout = QVBoxLayout()
+        advanced_info_layout = QVBoxLayout()
+        submit_layout = QHBoxLayout()
+        self.init_title(basic_info_layout)
+        self.init_date(basic_info_layout)
+        self.init_platform(basic_info_layout)
+        self.init_genre(basic_info_layout)
+        self.init_developer(advanced_info_layout)
+        self.init_publisher(advanced_info_layout)
+        self.init_submit(submit_layout)
+        layout_encapsulation.addLayout(basic_info_layout)
+        layout_encapsulation.addLayout(advanced_info_layout)
+        layout.addLayout(layout_encapsulation)
+        layout.addLayout(submit_layout)
 
     def init_date(self, basic_info_layout):
         self.date_edit = QDateEdit(self)
@@ -146,3 +133,49 @@ class New(QDialog):
         json_data.append_to_json(data)
 
         self.close()
+
+
+
+class NewSteam:
+    def __init__(self):
+        self.steam_id = None
+
+    def init_steam(self, layout):
+        self.steam_id = QLineEdit()
+        layout.addWidget(QLabel("Steam ID"))
+        layout.addWidget(self.steam_id)
+        self.init_submit_steam(layout)
+
+    def init_submit_steam(self, layout):
+        submit_button = QPushButton("Submit")
+        try:
+            submit_button.clicked.connect(self.submit_steam)
+        except Exception as e:
+            print(e)
+        layout.addWidget(submit_button)
+
+    def submit_steam(self):
+        steam_id = self.steam_id.text().strip()
+        steam_scraper_data = steam_scraper()
+        print(steam_id)
+
+
+class New(QDialog, NewManual, NewSteam):
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+        self.setWindowTitle('GameManager - New Title')
+
+    def init_ui(self):
+        layout = QVBoxLayout()
+        self.init_wizard(layout)
+        self.setLayout(layout)
+
+    def init_wizard(self, layout):
+        manual_button = QPushButton('Manual')
+        steam_button = QPushButton('From Steam')
+        layout.addWidget(manual_button)
+        layout.addWidget(steam_button)
+
+        manual_button.clicked.connect(lambda: self.init_manual(layout))
+        steam_button.clicked.connect(lambda: self.init_steam(layout))
