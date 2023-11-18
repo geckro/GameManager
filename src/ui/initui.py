@@ -1,6 +1,10 @@
+import os
+
+from PyQt6 import QtGui
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtWidgets import QVBoxLayout, QToolBar, QTableWidget, QTableView, QWidget, QTableWidgetItem
+from PyQt6.QtWidgets import QVBoxLayout, QToolBar, QTableWidget, QTableView, QWidget, QTableWidgetItem, QMenu, \
+    QSizePolicy
 
 from src.core.data.common_data import CommonData
 from src.core.data.game_data import GameData
@@ -28,18 +32,53 @@ class InitUI:
         self.load_data()
 
     def init_toolbar(self, central_widget):
-        toolbar = QToolBar(central_widget)
-        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
-        self.main_window.addToolBar(toolbar)
+        self.toolbar = QToolBar(central_widget)
+        self.toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+        self.main_window.addToolBar(self.toolbar)
 
-        new_action = QAction(QIcon.fromTheme("list-new"), 'New Title', self.main_window)
+        new_action = QAction(QIcon('src/img/icons/actions/window-new.svg'), 'New Title', self.main_window)
         new_action.triggered.connect(self.triggers.new_action_triggered)
 
-        add_action = QAction(QIcon.fromTheme("list-add"), 'Add Data', self.main_window)
+        add_action = QAction(QIcon('src/img/icons/actions/text-field.svg'), 'Add Data', self.main_window)
         add_action.triggered.connect(self.triggers.add_action_triggered)
 
-        toolbar.addAction(new_action)
-        toolbar.addAction(add_action)
+        spacer = QWidget()
+        spacer_policy = QSizePolicy()
+        spacer_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
+        spacer.setSizePolicy(spacer_policy)
+
+        options_action = QAction(QIcon('src/img/icons/actions/configure.svg'), 'Options', self.main_window)
+        options_action.triggered.connect(self.triggers.options_triggered)
+
+        self.toolbar.addAction(new_action)
+        self.toolbar.addAction(add_action)
+        self.toolbar.addWidget(spacer)
+        self.toolbar.addAction(options_action)
+
+        self.toolbar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.toolbar.customContextMenuRequested.connect(self.on_toolbar_context_menu)
+
+    def on_toolbar_context_menu(self, position):
+        context_menu = QMenu()
+        actions = ('Lock Toolbar', 'Hide Toolbar')
+        action_objs = {}
+
+        for action_text in actions:
+            action = context_menu.addAction(action_text)
+            action_objs[action_text] = action
+
+        selected_action = context_menu.exec(self.main_window.table_widget.viewport().mapToGlobal(position))
+        if selected_action:
+            if selected_action == action_objs['Lock Toolbar']:
+                if self.toolbar.isMovable():
+                    self.toolbar.setMovable(False)
+                elif not self.toolbar.isMovable():
+                    self.toolbar.setMovable(True)
+            if selected_action == action_objs['Hide Toolbar']:
+                if not self.toolbar.isHidden():
+                    self.toolbar.setHidden(True)
+                elif self.toolbar.isHidden():
+                    self.toolbar.setHidden(False)
 
     def init_table(self, layout):
         self.main_window.table_widget = QTableWidget()
@@ -49,8 +88,31 @@ class InitUI:
         self.main_window.table_widget.setSortingEnabled(True)
         self.main_window.table_widget.setTabKeyNavigation(False)
         self.main_window.table_widget.verticalHeader().setVisible(False)
+        self.main_window.table_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.main_window.table_widget.customContextMenuRequested.connect(self.on_context_menu)
 
         layout.addWidget(self.main_window.table_widget)
+
+    def on_context_menu(self, position):
+        context_menu = QMenu()
+        actions = ('Modify Entry', 'Delete Entry')
+        action_objs = {}
+
+        for action_text in actions:
+            action = context_menu.addAction(action_text)
+            action_objs[action_text] = action
+
+        item = self.main_window.table_widget.itemAt(position)
+
+        if item is not None:
+            selected_action = context_menu.exec(self.main_window.table_widget.viewport().mapToGlobal(position))
+            if selected_action:
+                if selected_action == action_objs['Modify Entry']:
+                    # TODO: ModifyEntry
+                    pass
+                elif selected_action == action_objs['Delete Entry']:
+                    # TODO: DeleteEntry
+                    pass
 
     def load_data(self):
         # Read the JSON data

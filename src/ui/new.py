@@ -156,8 +156,8 @@ class NewSteam:
 
     def submit_steam(self):
         steam_id = self.steam_id.text().strip()
-        steam_scraper_data = steam_scraper()
         print(steam_id)
+        self.close()
 
 
 class New(QDialog, NewManual, NewSteam):

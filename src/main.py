@@ -1,4 +1,3 @@
-import logging
 import sys
 
 from PyQt6.QtWidgets import QApplication
@@ -10,7 +9,6 @@ from ui.app import MainWindow
 def main():
     try:
         gui_app = QApplication([])
-        gui_app.setStyle('Fusion')
         window = MainWindow()
         window.show()
         log('info', "Executing window...")
