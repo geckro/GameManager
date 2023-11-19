@@ -105,14 +105,24 @@ class InitUI:
         item = self.main_window.table_widget.itemAt(position)
 
         if item is not None:
+            row = item.row()
+            data = []
+            num_columns = self.main_window.table_widget.columnCount()
+
+            for column in range(num_columns):
+                cell_item = self.main_window.table_widget.item(row, column)
+                if cell_item:
+                    data.append(cell_item.text())
+                else:
+                    data.append("")
+
             selected_action = context_menu.exec(self.main_window.table_widget.viewport().mapToGlobal(position))
             if selected_action:
                 if selected_action == action_objs['Modify Entry']:
                     # TODO: ModifyEntry
                     pass
                 elif selected_action == action_objs['Delete Entry']:
-                    # TODO: DeleteEntry
-                    pass
+                    self.game_data.delete_game_entry(data)
 
     def load_data(self):
         # Read the JSON data

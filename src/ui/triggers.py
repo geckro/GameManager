@@ -1,4 +1,4 @@
-from src.ui.new import New
+from src.ui.new import NewWizard
 from src.ui.add import Add
 from src.ui.options import Options
 
@@ -9,7 +9,7 @@ class Triggers:
 
     @staticmethod
     def new_action_triggered(self):
-        new = New()
+        new = NewWizard()
         new.exec()
 
     @staticmethod

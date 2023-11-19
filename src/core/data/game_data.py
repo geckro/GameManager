@@ -19,3 +19,7 @@ class GameData:
     def append_to_json(self, data):
         log('info', 'initializing func append_to_json in GameData')
         self.common_data.append_to_data_json(data)
+
+    def delete_game_entry(self, data):
+        log('info', 'initializing func delete_game_entry in GameData')
+        self.common_data.delete_entry(data)

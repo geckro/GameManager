@@ -1,8 +1,9 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLineEdit, QPushButton, QDateEdit, QLabel, QHBoxLayout, \
-    QTreeWidget, QTreeWidgetItem
+    QTreeWidget, QTreeWidgetItem, QWidget
 
 from src.core.data.developer_data import DeveloperData
+from src.core.data.engine_data import EngineData
 from src.core.data.game_data import GameData
 from src.core.data.genre_data import GenreData
 from src.core.data.platform_data import PlatformData
@@ -38,8 +39,16 @@ def get_checked_items(tree):
     return checked_items
 
 
-class NewManual:
+class New(QDialog):
     def __init__(self):
+        super().__init__()
+        self.setWindowTitle('New Title')
+        self.layout = QVBoxLayout()
+
+
+class NewManual(New):
+    def __init__(self):
+        super().__init__()
         self.platform_field = None
         self.date_edit = None
         self.developer_field = None
@@ -52,22 +61,33 @@ class NewManual:
         submit_button.clicked.connect(self.submit)
         submit_layout.addWidget(submit_button)
 
-    def init_manual(self, layout):
-        layout_encapsulation = QHBoxLayout()
-        basic_info_layout = QVBoxLayout()
-        advanced_info_layout = QVBoxLayout()
-        submit_layout = QHBoxLayout()
-        self.init_title(basic_info_layout)
-        self.init_date(basic_info_layout)
-        self.init_platform(basic_info_layout)
-        self.init_genre(basic_info_layout)
-        self.init_developer(advanced_info_layout)
-        self.init_publisher(advanced_info_layout)
-        self.init_submit(submit_layout)
-        layout_encapsulation.addLayout(basic_info_layout)
-        layout_encapsulation.addLayout(advanced_info_layout)
-        layout.addLayout(layout_encapsulation)
-        layout.addLayout(submit_layout)
+    def init_manual(self):
+        parent_layout = QHBoxLayout()
+        layout_top = QHBoxLayout()
+        layout_13 = QVBoxLayout()
+        layout_23 = QVBoxLayout()
+        layout_33 = QVBoxLayout()
+        layout_btm = QHBoxLayout()
+
+        self.init_title(layout_top)
+        self.init_date(layout_top)
+
+        self.init_platform(layout_13)
+
+        self.init_genre(layout_23)
+        self.init_developer(layout_23)
+
+        self.init_publisher(layout_33)
+        self.init_engine(layout_33)
+
+        self.init_submit(layout_btm)
+
+        parent_layout.addLayout(layout_13)
+        parent_layout.addLayout(layout_23)
+        parent_layout.addLayout(layout_33)
+        self.layout.addLayout(layout_top)
+        self.layout.addLayout(parent_layout)
+        self.layout.addLayout(layout_btm)
 
     def init_date(self, basic_info_layout):
         self.date_edit = QDateEdit(self)
@@ -134,25 +154,32 @@ class NewManual:
 
         self.close()
 
+    def init_engine(self, layout_33):
+        log('info', 'initializing new engine')
+        engine_data_obj = EngineData()
+        engine_list = engine_data_obj.get_engines()
+        self.engine_field = helper_qtreewidget(engine_list, 'Engine')
+        layout_33.addWidget(self.engine_field)
 
 
-class NewSteam:
+class NewSteam(New):
     def __init__(self):
+        super().__init__()
         self.steam_id = None
 
-    def init_steam(self, layout):
+    def init_steam(self):
         self.steam_id = QLineEdit()
-        layout.addWidget(QLabel("Steam ID"))
-        layout.addWidget(self.steam_id)
-        self.init_submit_steam(layout)
+        self.layout.addWidget(QLabel("Steam ID"))
+        self.layout.addWidget(self.steam_id)
+        self.init_submit_steam(self.layout)
 
-    def init_submit_steam(self, layout):
+    def init_submit_steam(self):
         submit_button = QPushButton("Submit")
         try:
             submit_button.clicked.connect(self.submit_steam)
         except Exception as e:
             print(e)
-        layout.addWidget(submit_button)
+        self.layout.addWidget(submit_button)
 
     def submit_steam(self):
         steam_id = self.steam_id.text().strip()
@@ -160,22 +187,74 @@ class NewSteam:
         self.close()
 
 
-class New(QDialog, NewManual, NewSteam):
+class NewWikipedia(New):
+    def __init__(self):
+        super().__init__()
+
+    def init_wikipedia(self):
+        parent_layout = QHBoxLayout()
+        layout_top = QHBoxLayout()
+        layout_13 = QVBoxLayout()
+        layout_23 = QVBoxLayout()
+        layout_btm = QHBoxLayout()
+
+        self.wikipedia_url = QLineEdit()
+        layout_top.addWidget(QLabel("Wikipedia page:"))
+        layout_top.addWidget(self.wikipedia_url)
+
+        self.init_submit_wkp(layout_top)
+
+        parent_layout.addLayout(layout_top)
+        parent_layout.addLayout(layout_13)
+        parent_layout.addLayout(layout_23)
+        parent_layout.addLayout(layout_btm)
+        self.layout.addLayout(parent_layout)
+
+    def init_submit_wkp(self, submit_layout):
+        submit_button = QPushButton("Submit", self)
+        submit_button.clicked.connect(lambda: self.submit_wikipedia(self.wikipedia_url))
+        submit_layout.addWidget(submit_button)
+
+    def submit_wikipedia(self, url_obj):
+        url = url_obj.text()
+
+
+
+class NewWizard(NewManual, NewSteam, NewWikipedia):
     def __init__(self):
         super().__init__()
         self.init_ui()
-        self.setWindowTitle('GameManager - New Title')
 
     def init_ui(self):
-        layout = QVBoxLayout()
-        self.init_wizard(layout)
-        self.setLayout(layout)
+        self.init_wizard()
+        self.setLayout(self.layout)
 
-    def init_wizard(self, layout):
-        manual_button = QPushButton('Manual')
-        steam_button = QPushButton('From Steam')
-        layout.addWidget(manual_button)
-        layout.addWidget(steam_button)
+    def init_wizard(self):
+        self.manual_button = QPushButton('Manual')
+        self.layout.addWidget(self.manual_button)
+        self.manual_button.clicked.connect(self.clicked_manual_btn)
 
-        manual_button.clicked.connect(lambda: self.init_manual(layout))
-        steam_button.clicked.connect(lambda: self.init_steam(layout))
+        self.steam_button = QPushButton('From Steam')
+        self.layout.addWidget(self.steam_button)
+        self.steam_button.clicked.connect(self.clicked_steam_btn)
+
+        self.wikipedia_button = QPushButton('From Wikipedia')
+        self.layout.addWidget(self.wikipedia_button)
+        self.wikipedia_button.clicked.connect(self.clicked_wikipedia_btn)
+
+    def hide_wizard_btns(self):
+        self.manual_button.hide()
+        self.steam_button.hide()
+        self.wikipedia_button.hide()
+
+    def clicked_manual_btn(self):
+        self.hide_wizard_btns()
+        self.init_manual()
+
+    def clicked_steam_btn(self):
+        self.hide_wizard_btns()
+        self.init_steam()
+
+    def clicked_wikipedia_btn(self):
+        self.hide_wizard_btns()
+        self.init_wikipedia()

@@ -28,3 +28,17 @@ class CommonData:
 
         with open(self.data_file_path, 'w') as data_file:
             json.dump(json_data, data_file)
+
+    def delete_entry(self, data):
+        with open(self.data_file_path, 'r') as data_file:
+            json_raw = json.load(data_file)
+
+        json_data_new = []
+
+        for x in json_raw:
+            if data[0] not in x['title'] or data[2] not in x['platforms']:
+                json_data_new.append(x)
+
+        if json_data_new:
+            with open(self.data_file_path, 'w') as data_file:
+                json.dump(json_data_new, data_file)
