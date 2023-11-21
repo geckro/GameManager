@@ -219,7 +219,6 @@ class NewWikipedia(New):
         url = url_obj.text()
 
 
-
 class NewWizard(NewManual, NewSteam, NewWikipedia):
     def __init__(self):
         super().__init__()

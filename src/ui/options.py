@@ -2,7 +2,9 @@ from PyQt6 import QtGui
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QDialog, QCheckBox, QVBoxLayout, QToolBar, QWidget, QHBoxLayout, QFileDialog, QComboBox, \
-    QLabel
+    QLabel, QStackedLayout, QPushButton, QLineEdit
+
+from core.config import add_to_config
 
 
 class Options(QDialog):
@@ -11,8 +13,9 @@ class Options(QDialog):
         self.setWindowTitle("GameManager - Options")
         self.init_ui()
 
-    def general_opts(self, parent_layout):
-        layout = QVBoxLayout()
+    def general_opts(self):
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
 
         opt_hide_toolbar = QCheckBox('Hide Toolbar')
         layout.addWidget(opt_hide_toolbar)
@@ -22,28 +25,57 @@ class Options(QDialog):
         layout.addWidget(QLabel('Application Theme'))
         layout.addWidget(opt_theme)
 
-        layout.setDirection(QVBoxLayout.Direction.TopToBottom)
-
-        layout.addStretch()
-        parent_layout.addLayout(layout)
+        return widget
 
 
-    def emulator_opts(self, parent_layout):
-        layout = QVBoxLayout()
-        opt_dolphin_dir = QFileDialog.getExistingDirectory(None, 'Select folder', 'C:\\')
-        layout.addWidget(opt_dolphin_dir)
-        parent_layout.addLayout(layout)
+    def emulator_opts(self):
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+
+        dolphin_layout = QHBoxLayout()
+
+        self.opt_dolphin_dir = QLineEdit()
+        self.opt_dolphin_dir.setReadOnly(True)
+        dolphin_layout.addWidget(self.opt_dolphin_dir)
+
+        opt_dolphin_button = QPushButton('Browse...')
+        opt_dolphin_button.clicked.connect(self.select_dolphin_directory)
+        dolphin_layout.addWidget(opt_dolphin_button)
+
+        citra_layout = QHBoxLayout()
+
+        self.opt_citra_dir = QLineEdit()
+        self.opt_citra_dir.setReadOnly(True)
+        citra_layout.addWidget(self.opt_citra_dir)
+
+        opt_citra_button = QPushButton('Browse...')
+        opt_citra_button.clicked.connect(self.select_citra_directory)
+        citra_layout.addWidget(opt_citra_button)
+
+        layout.addWidget(QLabel("Dolphin Folder Path"))
+        layout.addLayout(dolphin_layout)
+        layout.addWidget(QLabel("Citra Folder Path"))
+        layout.addLayout(citra_layout)
+        return widget
+
+    def select_dolphin_directory(self):
+        self.dolphin_directory = QFileDialog.getExistingDirectory(self, 'Select Dolphin Directory', 'C:\\')
+        self.opt_dolphin_dir.setText(self.dolphin_directory)
+        add_to_config()
+
+    def select_citra_directory(self):
+        self.citra_directory = QFileDialog.getExistingDirectory(self, 'Select Citra Directory', 'C:\\')
+        self.opt_citra_dir.setText(self.citra_directory)
 
     def init_ui(self):
-        self.parent_layout = QHBoxLayout(self)
+        self.layout = QHBoxLayout(self)
 
         self.toolbar = QToolBar()
         self.toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
         self.toolbar.setMovable(False)
         self.toolbar.setOrientation(Qt.Orientation.Vertical)
-        self.toolbar.setStyleSheet(
-            "background-color: rgb(255, 255, 255); border-radius: 1em; padding: 3px;"
-        )
+        self.toolbar.setStyleSheet("border-right: 1px solid rgba(0, 0, 0, 100);")
+        self.layout.addWidget(self.toolbar)
 
         general_opt = QAction(QIcon('src/img/icons/actions/configure.svg'), 'General', self)
         self.toolbar.addAction(general_opt)
@@ -51,10 +83,11 @@ class Options(QDialog):
         emulator_opt = QAction(QIcon('src/img/icons/actions/application-x-apple-diskimage.svg'), 'Emulators', self)
         self.toolbar.addAction(emulator_opt)
 
-        general_opt.triggered.connect(self.general_opts)
+        self.stacked_layout = QStackedLayout()
+        self.layout.addLayout(self.stacked_layout)
 
-        emulator_opt.triggered.connect(self.emulator_opts)
+        self.stacked_layout.addWidget(self.general_opts())
+        self.stacked_layout.addWidget(self.emulator_opts())
 
-        self.parent_layout.addWidget(self.toolbar)
-
-        self.general_opts(self.parent_layout)
+        general_opt.triggered.connect(lambda: self.stacked_layout.setCurrentIndex(0))
+        emulator_opt.triggered.connect(lambda: self.stacked_layout.setCurrentIndex(1))
