@@ -1,6 +1,5 @@
 import json
 import pathlib
-import os
 
 from src.core.log import log
 
