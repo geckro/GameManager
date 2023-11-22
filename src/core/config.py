@@ -11,8 +11,14 @@ def _check_config():
     return True if data_file_path else False
 
 
-def add_to_config():
-    _check_config_var = _check_config()
-    if _check_config_var:
-        with open(_settings_path, 'r') as config:
-            yaml.safe_load(config)
+def add_to_config(configuration, value):
+    # _check_config_var = _check_config()
+    # if _check_config_var:
+    #     with open(_settings_path, 'r') as config:
+    #         yaml.safe_load(config)
+    pass
+
+
+def check_option(configuration: str):
+    # _check_config_var = _check_config()
+    return True
