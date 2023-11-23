@@ -10,11 +10,15 @@ def get_default_emulator_paths():
         drive = str(os.getenv('SystemDrive'))
         home = str(pathlib.Path.home())
 
-        files_to_check = (
-            f'{drive}\\RetroArch-Win64\\retroarch.exe',
-            f'{home}\\AppData\\Local\\yuzu\\yuzu-windows-msvc\\yuzu.exe'
+        _emulator_files = (
+            (f'{drive}\\RetroArch-Win64\\retroarch.exe', 'retroarch'),  # RetroArch
+            (f'{home}\\AppData\\Local\\yuzu\\yuzu-windows-msvc\\yuzu.exe', 'yuzu'),  # Yuzu
+            (f'{home}\\AppData\\Local\\Citra\\nightly\\citra.exe', 'citra')  # Citra
         )
+
         # Check for executables because some programs may just leave folders behind
-        for file in files_to_check:
+        for file, emulator in _emulator_files:
             if pathlib.Path(file).is_file():
-                print(f'{file} true')
+                add_to_config(f"{emulator}_directory", file)
+
+        add_to_config("has_not_checked_emulator_paths", False)

@@ -95,7 +95,7 @@ class InitUI:
 
     def on_context_menu(self, position):
         context_menu = QMenu()
-        actions = ('Modify Entry', 'Delete Entry')
+        actions = ('Play', 'Modify Entry', 'Delete Entry')
         action_objs = {}
 
         for action_text in actions:

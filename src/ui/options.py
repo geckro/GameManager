@@ -29,14 +29,12 @@ class Options(QDialog):
         return widget
 
     def emulator_opts(self):
-        if check_option('has_not_checked_emulator_paths'):
-            get_default_emulator_paths()
+        get_default_emulator_paths()
 
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
         emulator_path_layout = QGridLayout()
-
         emulator_path_layout.addWidget(QLabel("Dolphin Folder Path"), 0, 0)
         self.opt_dolphin_dir = QLineEdit()
         self.opt_dolphin_dir.setReadOnly(True)
@@ -48,6 +46,7 @@ class Options(QDialog):
         emulator_path_layout.addWidget(QLabel("RetroArch Folder Path"), 0, 2)
         self.opt_retroarch_dir = QLineEdit()
         self.opt_retroarch_dir.setReadOnly(True)
+        self.opt_retroarch_dir.setText(check_option('retroarch_directory'))
         emulator_path_layout.addWidget(self.opt_retroarch_dir, 1, 2)
         opt_retroarch_button = QPushButton('Browse...')
         opt_retroarch_button.clicked.connect(self.select_retroarch_dir)
@@ -56,6 +55,7 @@ class Options(QDialog):
         emulator_path_layout.addWidget(QLabel("Citra Folder Path"), 2, 0)
         self.opt_citra_dir = QLineEdit()
         self.opt_citra_dir.setReadOnly(True)
+        self.opt_citra_dir.setText(check_option('citra_directory'))
         emulator_path_layout.addWidget(self.opt_citra_dir, 3, 0)
         opt_citra_button = QPushButton('Browse...')
         opt_citra_button.clicked.connect(self.select_citra_dir)
@@ -64,6 +64,7 @@ class Options(QDialog):
         emulator_path_layout.addWidget(QLabel("Yuzu Folder Path"), 4, 0)
         self.opt_yuzu_dir = QLineEdit()
         self.opt_yuzu_dir.setReadOnly(True)
+        self.opt_yuzu_dir.setText(check_option('yuzu_directory'))
         emulator_path_layout.addWidget(self.opt_yuzu_dir, 5, 0)
         opt_yuzu_button = QPushButton('Browse...')
         opt_yuzu_button.clicked.connect(self.select_yuzu_dir)

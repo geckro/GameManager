@@ -9,7 +9,7 @@ from core.log import log
 from ui.app import MainWindow
 
 
-def argparser():
+def argument_parser():
     """
     Parse arguments using the python standard library argparse.
     """
@@ -23,13 +23,13 @@ def main():
     Start the application.
     """
     try:
-        parser = argparser()
+        parser = argument_parser()
         argv = sys.argv[1:]
-        args = parser.parse_args(argv)
+        arguments = parser.parse_args(argv)
+
         gui_app = QApplication([])
         window = MainWindow()
         window.show()
-        log('info', "Executing window...")
         sys.exit(gui_app.exec())
 
     except Exception as e:
