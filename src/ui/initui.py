@@ -1,6 +1,3 @@
-import os
-
-from PyQt6 import QtGui
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QVBoxLayout, QToolBar, QTableWidget, QTableView, QWidget, QTableWidgetItem, QMenu, \
